@@ -89,23 +89,23 @@ export const login: RequestHandler<
   }
 };
 
-// export const logout = async (req, res, next) => {
-//   try {
-//     //clearing the cookie
-//     res.cookie("authToken", "", {
-//       expires: new Date(0),
-//       httpOnly: true,
-//       sameSite: "strict",
-//     });
+export const logout: RequestHandler = async (req, res, next) => {
+  try {
+    //clearing the cookie
+    res.cookie("key", "", {
+      expires: new Date(0),
+      httpOnly: true,
+      sameSite: "strict",
+    });
 
-//     return res.status(200).json({
-//       success: true,
-//       message: "Logout successfully",
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+    res.status(200).json({
+      success: true,
+      message: "Logout successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // export const me = async (req, res, next) => {
 //   try {
