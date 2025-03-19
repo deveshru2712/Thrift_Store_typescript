@@ -24,6 +24,10 @@ export const signup: RequestHandler<
       throw createHttpError(409, "Email is already taken ");
     }
 
+    if (password.length < 6) {
+      throw createHttpError(409, "Password must of at least 6 character");
+    }
+
     //encrypting the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);

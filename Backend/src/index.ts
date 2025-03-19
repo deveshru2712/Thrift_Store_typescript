@@ -9,6 +9,7 @@ import env from "./utils/validateEnv";
 
 import connectToDb from "./config/Db";
 import authRouter from "./routes/auth.routes";
+import { z } from "zod";
 // import productRouter from "./routes/product.routes.js";
 // import cartRouter from "./routes/cart.routes.js";
 
@@ -34,10 +35,37 @@ app.use((req, res, next) => {
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
   let errorMessage = "Unknown error occurred";
   let statusCode = 500;
+
+  // http errors
   if (isHttpError(error)) {
     statusCode = error.statusCode;
     errorMessage = error.message;
   }
+
+  //zod errors
+
+  if (error instanceof z.ZodError) {
+    const formattedErrors = error.issues.map((issue) => ({
+      field: issue.path[0],
+      message: issue.message,
+    }));
+
+    // Log formatted errors
+
+    console.error(`Zod Validation Errors:`);
+    formattedErrors.forEach((error) => {
+      console.error(`Field: ${error.field}, Message: ${error.message}`);
+    });
+
+    // Send formatted errors in response
+
+    res.status(400).json({
+      success: false,
+      errors: formattedErrors,
+    });
+    return;
+  }
+
   res.status(statusCode).json({ error: errorMessage });
 });
 
