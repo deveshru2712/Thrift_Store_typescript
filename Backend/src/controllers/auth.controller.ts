@@ -53,35 +53,41 @@ export const signup: RequestHandler<
   }
 };
 
-// export const login = async (req, res, next) => {
-//   try {
-//     const { email, password } = req.body;
+interface logInBody {
+  email: string;
+  password: string;
+}
 
-//     //checking for user
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       const error = new Error("Email is not associated with any account");
-//       error.status = 401;
-//       throw error;
-//     }
-//     //comparing the password
-//     const checkPassword = await bcrypt.compare(password, user.password);
-//     if (!checkPassword) {
-//       const error = new Error("Wrong Password");
-//       error.status = 401;
-//       throw error;
-//     }
+export const login: RequestHandler<
+  unknown,
+  unknown,
+  logInBody,
+  unknown
+> = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
 
-//     genToken(res, user._id);
-//     res.status(200).json({
-//       success: true,
-//       user: { ...user._doc, password: null },
-//       message: "Logged in successfully.",
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+    //checking for user
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw createHttpError(404, "User not found");
+    }
+    //comparing the password
+    const checkPassword = await bcrypt.compare(password, user.password);
+    if (!checkPassword) {
+      throw createHttpError(401, "Wrong Credentials");
+    }
+
+    genToken(user._id, res);
+    res.status(200).json({
+      success: true,
+      user: { ...user.toObject(), password: null },
+      message: "Logged in successfully.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // export const logout = async (req, res, next) => {
 //   try {
